@@ -47,53 +47,56 @@ class MainScreen extends StatelessWidget {
               ),
             ),
           ),
-
-          Row(
-            children: [
-              Container(
-                width: 250,
-                height: 60,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: const BoxDecoration(
-                  border: Border(
-                    right: BorderSide(color: Colors.black, width: 1),
-                  ),
-                ),
-                child: const ArrowContainer(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  width: 50,
-                  color: Color.fromRGBO(98, 17, 50, 1),
-                  child: Row(
-                    children: [
-                      SizedBox(width: 5),
-                      Text(
-                        'Publicaciones Recientes',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              // S
-              Container(
-                width: 1200,
-                decoration:
-                    BoxDecoration(border: Border.all(color: Colors.black)),
-                child: const NewsMarquee(),
-              ),
-            ],
-          ),
-          // Main content
           Container(
-            color: Colors.white,
-            child: const Contain(),
+            child: Row(
+              children: [
+                Container(
+                  width: 250,
+                  height: 60,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      right: BorderSide(color: Colors.black, width: 1),
+                    ),
+                  ),
+                  child: const ArrowContainer(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    width: 50,
+                    color: Color.fromRGBO(98, 17, 50, 1),
+                    child: Row(
+                      children: [
+                        SizedBox(width: 5),
+                        Text(
+                          'Publicaciones Recientes',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // S
+                Container(
+                  width: 1200,
+                  decoration:
+                      BoxDecoration(border: Border.all(color: Colors.black)),
+                  child: const NewsMarquee(),
+                ),
+              ],
+            ),
           ),
-          Expanded(child: SearchBarFraude()),
-
+          Expanded(
+            child: Container(
+              child: ListView.builder(
+                  itemCount: secctions.length,
+                  itemBuilder: (context, index) {
+                    return secctions[index];
+                  }),
+            ),
+          ),
           Container(
             color: Colors.black87,
             child: const SafeArea(
@@ -473,3 +476,8 @@ class ArrowPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+
+List<Widget> secctions = [
+  Contain(),
+  SearchBarFraude(),
+];
