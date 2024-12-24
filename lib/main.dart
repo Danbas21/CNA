@@ -1,4 +1,6 @@
 import 'package:cna/contenido.dart';
+import 'package:cna/footer.dart';
+import 'package:cna/search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
@@ -8,13 +10,16 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
         fontFamily: 'Montserrat',
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+            primary: const Color.fromRGBO(165, 127, 44, 1),
+            surface: Colors.white),
         primaryColor: const Color.fromRGBO(165, 127, 44, 1),
       ),
       home: const MainScreen(),
@@ -83,9 +88,17 @@ class MainScreen extends StatelessWidget {
             ],
           ),
           // Main content
-          const ColoredBox(
+          Container(
             color: Colors.white,
-            child: Contain(),
+            child: const Contain(),
+          ),
+          Expanded(child: SearchBarFraude()),
+
+          Container(
+            color: Colors.black87,
+            child: const SafeArea(
+              child: FooterSection(),
+            ),
           ),
         ],
       ),
@@ -160,9 +173,10 @@ class SubNavigationBar extends StatelessWidget {
       height: kToolbarHeight,
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       decoration: const BoxDecoration(
+        color: const Color.fromRGBO(165, 127, 44, 1),
         border: Border(
           top: BorderSide(
-            color: Colors.grey,
+            color: const Color.fromRGBO(165, 127, 44, 1),
             width: 0.5,
           ),
         ),
@@ -201,6 +215,11 @@ class SubNavigationBar extends StatelessWidget {
                     'https://www.profeco.gob.mx/transparencia_gob/transparencia.html',
                     context,
                   ),
+                  _buildNavButton(
+                    'Folio de Queja',
+                    'https://www.profeco.gob.mx/transparencia_gob/transparencia.html',
+                    context,
+                  ),
                 ],
               ),
             ),
@@ -234,7 +253,7 @@ class SubNavigationBar extends StatelessWidget {
 }
 
 class NewsMarquee extends StatefulWidget {
-  const NewsMarquee({Key? key}) : super(key: key);
+  const NewsMarquee({super.key});
 
   @override
   State<NewsMarquee> createState() => _NewsMarqueeState();
@@ -360,7 +379,7 @@ class _NewsMarqueeState extends State<NewsMarquee> {
                                 fontSize: 15,
                                 color: Colors.black,
                                 fontStyle: FontStyle.normal,
-                                fontWeight: FontWeight.w900),
+                                fontWeight: FontWeight.w400),
                           ),
                           const SizedBox(width: 6),
                           Text(
@@ -370,7 +389,7 @@ class _NewsMarqueeState extends State<NewsMarquee> {
                                 letterSpacing: 4.5,
                                 decoration: TextDecoration.underline,
                                 fontStyle: FontStyle.normal,
-                                fontWeight: FontWeight.w900),
+                                fontWeight: FontWeight.w400),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -407,12 +426,12 @@ class ArrowContainer extends StatelessWidget {
   final Color color;
 
   const ArrowContainer({
-    Key? key,
+    super.key,
     required this.child,
     required this.padding,
     required this.width,
     required this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
