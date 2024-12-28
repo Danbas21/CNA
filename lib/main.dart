@@ -1,110 +1,182 @@
 import 'package:cna/contenido.dart';
+import 'package:cna/contenido2.dart';
 import 'package:cna/footer.dart';
+import 'package:cna/form_atte.dart';
 import 'package:cna/search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        fontFamily: 'Montserrat',
-        colorScheme: ColorScheme.fromSwatch().copyWith(
-            primary: const Color.fromRGBO(165, 127, 44, 1),
-            surface: Colors.white),
-        primaryColor: const Color.fromRGBO(165, 127, 44, 1),
-      ),
-      home: const MainScreen(),
-    );
-  }
+  State<MainScreen> createState() => _MainScreenState();
 }
 
-class MainScreen extends StatelessWidget {
-  const MainScreen({super.key});
+class _MainScreenState extends State<MainScreen> {
+  late Widget currentContent;
+
+  @override
+  void initState() {
+    super.initState();
+    currentContent = _buildContentContainer(
+      child: ListView.builder(
+        itemCount: secctions.length,
+        itemBuilder: (context, index) {
+          return secctions[index];
+        },
+      ),
+    );
+  }
+
+  void _showFormulario() {
+    setState(() {
+      currentContent = _buildContentContainer(
+        child: FormularioConsulta(),
+      );
+    });
+  }
+
+  void _showListView() {
+    setState(() {
+      currentContent = _buildContentContainer(
+        child: ListView.builder(
+          itemCount: secctions.length,
+          itemBuilder: (context, index) {
+            return secctions[index];
+          },
+        ),
+      );
+    });
+  }
+
+  Widget _buildContentContainer({required Widget child}) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Ajustar el ancho según el tamaño de la pantalla
+        double containerWidth =
+            constraints.maxWidth > 900 ? 900 : constraints.maxWidth;
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 16),
+          width: containerWidth,
+          child: child,
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final bool isDesktop = constraints.maxWidth > 800;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                color: Colors.black87,
+                child: const SafeArea(
+                  child: Column(
+                    children: [
+                      CustomNavigationBar(),
+                      SubNavigationBar(),
+                    ],
+                  ),
+                ),
+              ),
+              if (isDesktop)
+                _buildDesktopNewsSection(constraints)
+              else
+                _buildMobileNewsSection(),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Center(
+                    child: currentContent,
+                  ),
+                ),
+              ),
+              Container(
+                color: Colors.black87,
+                child: const SafeArea(
+                  child: FooterSection(),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildDesktopNewsSection(BoxConstraints constraints) {
+    return Container(
+      child: Row(
         children: [
           Container(
-            color: Colors.black87,
-            child: const SafeArea(
-              child: Column(
+            width: 250,
+            height: 60,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: const BoxDecoration(
+              border: Border(
+                right: BorderSide(color: Colors.black, width: 1),
+              ),
+            ),
+            child: const ArrowContainer(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              width: 50,
+              color: Color.fromRGBO(98, 17, 50, 1),
+              child: Row(
                 children: [
-                  CustomNavigationBar(),
-                  SubNavigationBar(),
+                  SizedBox(width: 5),
+                  Text(
+                    'Publicaciones Recientes',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
-          Container(
-            child: Row(
-              children: [
-                Container(
-                  width: 250,
-                  height: 60,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: const BoxDecoration(
-                    border: Border(
-                      right: BorderSide(color: Colors.black, width: 1),
-                    ),
-                  ),
-                  child: const ArrowContainer(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    width: 50,
-                    color: Color.fromRGBO(98, 17, 50, 1),
-                    child: Row(
-                      children: [
-                        SizedBox(width: 5),
-                        Text(
-                          'Publicaciones Recientes',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                // S
-                Container(
-                  width: 1200,
-                  decoration:
-                      BoxDecoration(border: Border.all(color: Colors.black)),
-                  child: const NewsMarquee(),
-                ),
-              ],
-            ),
-          ),
           Expanded(
             child: Container(
-              child: ListView.builder(
-                  itemCount: secctions.length,
-                  itemBuilder: (context, index) {
-                    return secctions[index];
-                  }),
-            ),
-          ),
-          Container(
-            color: Colors.black87,
-            child: const SafeArea(
-              child: FooterSection(),
+              decoration:
+                  BoxDecoration(border: Border.all(color: Colors.black)),
+              child: const NewsMarquee(),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildMobileNewsSection() {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          color: const Color.fromRGBO(98, 17, 50, 1),
+          width: double.infinity,
+          child: const Text(
+            'Publicaciones Recientes',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(border: Border.all(color: Colors.black)),
+          child: const NewsMarquee(),
+        ),
+      ],
     );
   }
 }
@@ -174,12 +246,13 @@ class SubNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: kToolbarHeight,
+      width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       decoration: const BoxDecoration(
-        color: const Color.fromRGBO(165, 127, 44, 1),
+        color: Color.fromRGBO(165, 127, 44, 1),
         border: Border(
           top: BorderSide(
-            color: const Color.fromRGBO(165, 127, 44, 1),
+            color: Color.fromRGBO(165, 127, 44, 1),
             width: 0.5,
           ),
         ),
@@ -195,17 +268,17 @@ class SubNavigationBar extends StatelessWidget {
                 children: [
                   _buildNavButton(
                     'Prensa',
-                    '/profeco/esRecomendaciones/archivo/prensa',
+                    'https:/profeco/esRecomendaciones/archivo/prensa',
                     context,
                   ),
                   _buildNavButton(
                     'Acciones y programas',
-                    '/profeco/esRecomendaciones/archivo/acciones_y_programas',
+                    'https:/profeco/esRecomendaciones/archivo/acciones_y_programas',
                     context,
                   ),
                   _buildNavButton(
                     'Contacto',
-                    '/profeco/esRecomendaciones/#2240',
+                    'https://profeco/esRecomendaciones/#2240',
                     context,
                   ),
                   _buildNavButton(
@@ -220,7 +293,7 @@ class SubNavigationBar extends StatelessWidget {
                   ),
                   _buildNavButton(
                     'Folio de Queja',
-                    'https://www.profeco.gob.mx/transparencia_gob/transparencia.html',
+                    '/form_atte.dart',
                     context,
                   ),
                 ],
@@ -236,9 +309,17 @@ class SubNavigationBar extends StatelessWidget {
     return TextButton(
       onPressed: () {
         if (route.startsWith('http')) {
-          // Implementar url_launcher aquí
+          final _MainScreenState mainScreenState =
+              context.findAncestorStateOfType<_MainScreenState>()!;
+          if (mainScreenState != true) {
+            mainScreenState._showListView();
+          }
         } else {
-          Navigator.pushNamed(context, route);
+          final _MainScreenState mainScreenState =
+              context.findAncestorStateOfType<_MainScreenState>()!;
+          if (mainScreenState != true) {
+            mainScreenState._showFormulario();
+          }
         }
       },
       style: TextButton.styleFrom(
@@ -478,6 +559,7 @@ class ArrowPainter extends CustomPainter {
 }
 
 List<Widget> secctions = [
-  Contain(),
-  SearchBarFraude(),
+  const Contain(),
+  const SearchBarFraude(),
+  const Parrafo(),
 ];

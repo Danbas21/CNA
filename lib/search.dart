@@ -68,36 +68,47 @@ class SearchBarFraudeState extends State<SearchBarFraude> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          width: 700,
-          child: const Text(
-            'Consulta de Empresas en Investigación por fraude:',
-            style: TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+        const SizedBox(
+          height: 50,
         ),
-        Row(
+        Column(
           children: [
-            Expanded(
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Buscar empresa...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25.0),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20.0, vertical: 15.0),
+            const SizedBox(
+              width: 700,
+              child: Text(
+                'Consulta de Empresas en Investigación por fraude:',
+                style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
                 ),
-                textCapitalization: TextCapitalization.characters,
-                onSubmitted: (_) => _realizarBusqueda(),
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: _realizarBusqueda,
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      iconColor: Colors.amberAccent,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25.0),
+                      ),
+                      hintText: 'Buscar empresa...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25.0),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20.0, vertical: 15.0),
+                    ),
+                    textCapitalization: TextCapitalization.characters,
+                    onSubmitted: (_) => _realizarBusqueda(),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: _realizarBusqueda,
+                ),
+              ],
             ),
             const SizedBox(height: 200),
           ],

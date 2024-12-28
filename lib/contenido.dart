@@ -22,10 +22,23 @@ class Contain extends StatelessWidget {
             fontWeight: FontWeight.w300,
           ),
         ),
-        Image.asset(
-          'assets/image1.jpg',
-          width: 500,
-          height: 500,
+        Column(
+          children: [
+            Image.asset(
+              'assets/image1.jpg',
+              width: 900,
+              height: 500,
+              fit: BoxFit.cover,
+            ),
+            const Text(
+              'Campaña Nacional Antifraude Cibernético',
+              style: TextStyle(
+                fontSize: 30,
+                color: Colors.black,
+                fontWeight: FontWeight.w300,
+              ),
+            ),
+          ],
         ),
       ],
     );
