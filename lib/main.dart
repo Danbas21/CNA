@@ -7,6 +7,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData(
+        fontFamily: 'Montserrat',
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+            primary: const Color.fromRGBO(165, 127, 44, 1),
+            surface: Colors.white),
+        primaryColor: const Color.fromRGBO(165, 127, 44, 1),
+      ),
+      home: const MainScreen(),
+    );
+  }
+}
+
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -20,163 +42,112 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    currentContent = _buildContentContainer(
+    // Inicialmente mostrar el ListView
+    currentContent = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 16),
+      width: 900,
       child: ListView.builder(
-        itemCount: secctions.length,
-        itemBuilder: (context, index) {
-          return secctions[index];
-        },
-      ),
+          itemCount: secctions.length,
+          itemBuilder: (context, index) {
+            return secctions[index];
+          }),
     );
   }
 
   void _showFormulario() {
     setState(() {
-      currentContent = _buildContentContainer(
-        child: FormularioConsulta(),
+      currentContent = Container(
+        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 16),
+        width: 900,
+        child: FormularioConsulta(), // Tu widget de formulario
       );
     });
   }
 
+  // Método para volver al ListView
   void _showListView() {
     setState(() {
-      currentContent = _buildContentContainer(
+      currentContent = Container(
+        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 16),
+        width: 900,
         child: ListView.builder(
-          itemCount: secctions.length,
-          itemBuilder: (context, index) {
-            return secctions[index];
-          },
-        ),
+            itemCount: secctions.length,
+            itemBuilder: (context, index) {
+              return secctions[index];
+            }),
       );
     });
-  }
-
-  Widget _buildContentContainer({required Widget child}) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Ajustar el ancho según el tamaño de la pantalla
-        double containerWidth =
-            constraints.maxWidth > 900 ? 900 : constraints.maxWidth;
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 16),
-          width: containerWidth,
-          child: child,
-        );
-      },
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final bool isDesktop = constraints.maxWidth > 800;
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                color: Colors.black87,
-                child: const SafeArea(
-                  child: Column(
-                    children: [
-                      CustomNavigationBar(),
-                      SubNavigationBar(),
-                    ],
-                  ),
-                ),
-              ),
-              if (isDesktop)
-                _buildDesktopNewsSection(constraints)
-              else
-                _buildMobileNewsSection(),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Center(
-                    child: currentContent,
-                  ),
-                ),
-              ),
-              Container(
-                color: Colors.black87,
-                child: const SafeArea(
-                  child: FooterSection(),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildDesktopNewsSection(BoxConstraints constraints) {
-    return Container(
-      child: Row(
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: 250,
-            height: 60,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: const BoxDecoration(
-              border: Border(
-                right: BorderSide(color: Colors.black, width: 1),
-              ),
-            ),
-            child: const ArrowContainer(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              width: 50,
-              color: Color.fromRGBO(98, 17, 50, 1),
-              child: Row(
+            color: Colors.black87,
+            child: const SafeArea(
+              child: Column(
                 children: [
-                  SizedBox(width: 5),
-                  Text(
-                    'Publicaciones Recientes',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+                  CustomNavigationBar(),
+                  SubNavigationBar(),
                 ],
               ),
             ),
           ),
+          Container(
+            child: Row(
+              children: [
+                Container(
+                  width: 250,
+                  height: 60,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      right: BorderSide(color: Colors.black, width: 1),
+                    ),
+                  ),
+                  child: const ArrowContainer(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    width: 50,
+                    color: Color.fromRGBO(98, 17, 50, 1),
+                    child: Row(
+                      children: [
+                        SizedBox(width: 5),
+                        Text(
+                          'Publicaciones Recientes',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // S
+                Container(
+                  width: 1200,
+                  decoration:
+                      BoxDecoration(border: Border.all(color: Colors.black)),
+                  child: const NewsMarquee(),
+                ),
+              ],
+            ),
+          ),
           Expanded(
-            child: Container(
-              decoration:
-                  BoxDecoration(border: Border.all(color: Colors.black)),
-              child: const NewsMarquee(),
+            child: currentContent, //,
+          ),
+          Container(
+            color: Colors.black87,
+            child: const SafeArea(
+              child: FooterSection(),
             ),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildMobileNewsSection() {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          color: const Color.fromRGBO(98, 17, 50, 1),
-          width: double.infinity,
-          child: const Text(
-            'Publicaciones Recientes',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-        Container(
-          decoration: BoxDecoration(border: Border.all(color: Colors.black)),
-          child: const NewsMarquee(),
-        ),
-      ],
     );
   }
 }

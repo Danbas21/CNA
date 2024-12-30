@@ -203,12 +203,14 @@ class FooterSection extends StatelessWidget {
             ),
             _buildSocialIcon(
               FontAwesomeIcons.instagram,
-              'https://www.instagram',
+              'https://www.instagram.com/cnaofficial1/',
             ),
             _buildSocialIcon(
               FontAwesomeIcons.youtube,
               'https://www.youtube.com',
             ),
+            _buildSocialIcon(
+                FontAwesomeIcons.whatsapp, 'https://wa.me/525532432264'),
           ],
         ),
       ],
