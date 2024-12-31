@@ -1,3 +1,4 @@
+import 'package:cna/contacto.dart';
 import 'package:cna/contenido.dart';
 import 'package:cna/contenido2.dart';
 import 'package:cna/footer.dart';
@@ -59,7 +60,7 @@ class _MainScreenState extends State<MainScreen> {
       currentContent = Container(
         padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 16),
         width: 900,
-        child: FormularioConsulta(), // Tu widget de formulario
+        child: const FormularioConsulta(), // Tu widget de formulario
       );
     });
   }
@@ -75,6 +76,16 @@ class _MainScreenState extends State<MainScreen> {
             itemBuilder: (context, index) {
               return secctions[index];
             }),
+      );
+    });
+  }
+
+  void _contactform() {
+    setState(() {
+      currentContent = Container(
+        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 16),
+        width: 900,
+        child: const FormularioContacto(), // Tu widget de formulario
       );
     });
   }
@@ -96,46 +107,44 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
           ),
-          Container(
-            child: Row(
-              children: [
-                Container(
-                  width: 250,
-                  height: 60,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: const BoxDecoration(
-                    border: Border(
-                      right: BorderSide(color: Colors.black, width: 1),
-                    ),
+          Row(
+            children: [
+              Container(
+                width: 250,
+                height: 60,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: const BoxDecoration(
+                  border: Border(
+                    right: BorderSide(color: Colors.black, width: 1),
                   ),
-                  child: const ArrowContainer(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    width: 50,
-                    color: Color.fromRGBO(98, 17, 50, 1),
-                    child: Row(
-                      children: [
-                        SizedBox(width: 5),
-                        Text(
-                          'Publicaciones Recientes',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                ),
+                child: const ArrowContainer(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  width: double.infinity,
+                  color: Color.fromRGBO(98, 17, 50, 1),
+                  child: Row(
+                    children: [
+                      SizedBox(width: 5),
+                      Text(
+                        'Publicaciones Recientes',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-                // S
-                Container(
-                  width: 1200,
-                  decoration:
-                      BoxDecoration(border: Border.all(color: Colors.black)),
-                  child: const NewsMarquee(),
-                ),
-              ],
-            ),
+              ),
+              // S
+              Container(
+                width: 1200,
+                decoration:
+                    BoxDecoration(border: Border.all(color: Colors.black)),
+                child: const NewsMarquee(),
+              ),
+            ],
           ),
           Expanded(
             child: currentContent, //,
@@ -158,10 +167,15 @@ class CustomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.maxFinite,
       height: kToolbarHeight,
       color: const Color.fromRGBO(98, 17, 50, 1),
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding:
+          const EdgeInsets.symmetric(horizontal: BorderSide.strokeAlignCenter),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
         children: [
           // Logo
           IconButton(
@@ -249,7 +263,7 @@ class SubNavigationBar extends StatelessWidget {
                   ),
                   _buildNavButton(
                     'Contacto',
-                    'https://profeco/esRecomendaciones/#2240',
+                    '../contacto.dart',
                     context,
                   ),
                   _buildNavButton(
@@ -286,10 +300,14 @@ class SubNavigationBar extends StatelessWidget {
             mainScreenState._showListView();
           }
         } else {
-          final _MainScreenState mainScreenState =
-              context.findAncestorStateOfType<_MainScreenState>()!;
-          if (mainScreenState != true) {
+          if (route == '/form_atte.dart') {
+            final _MainScreenState mainScreenState =
+                context.findAncestorStateOfType<_MainScreenState>()!;
             mainScreenState._showFormulario();
+          } else if (route == '../contacto.dart') {
+            final _MainScreenState mainScreenState =
+                context.findAncestorStateOfType<_MainScreenState>()!;
+            mainScreenState._contactform();
           }
         }
       },
@@ -381,6 +399,7 @@ class _NewsMarqueeState extends State<NewsMarquee> {
     return Container(
       height: 70, // Altura reducida para el marquee horizontal
       color: Colors.white,
+      width: double.maxFinite,
       child: Row(
         children: [
           Expanded(
@@ -390,13 +409,14 @@ class _NewsMarqueeState extends State<NewsMarquee> {
               itemCount: newsItems.length,
               itemBuilder: (context, index) {
                 return Container(
+                  width: double.maxFinite, // Ancho fijo para cada noticia
                   decoration: const BoxDecoration(
                     border: Border(
                       right: BorderSide(color: Colors.black, width: 1),
                     ),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  width: 900, // Ancho fijo para cada noticia
+                  // Ancho fijo para cada noticia
                   child: Row(
                     children: [
                       // Botón Nuevo

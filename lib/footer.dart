@@ -3,18 +3,114 @@ import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class FooterSection extends StatelessWidget {
+class FooterSection extends StatefulWidget {
   const FooterSection({super.key});
+
+  @override
+  State<FooterSection> createState() => _FooterSectionState();
+}
+
+class _FooterSectionState extends State<FooterSection>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  bool _isExpanded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _toggleExpanded() {
+    setState(() {
+      _isExpanded = !_isExpanded;
+      if (_isExpanded) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isDesktop = constraints.maxWidth > 800;
-        return Container(
-          color: const Color.fromRGBO(98, 17, 50, 1),
-          padding: EdgeInsets.all(isDesktop ? 16.0 : 12.0),
-          child: isDesktop ? _buildDesktopLayout() : _buildMobileLayout(),
+
+        if (isDesktop) {
+          return Container(
+            color: const Color.fromRGBO(98, 17, 50, 1),
+            padding: const EdgeInsets.all(16.0),
+            child: _buildDesktopLayout(),
+          );
+        }
+
+        return GestureDetector(
+          onVerticalDragEnd: (details) {
+            if (details.primaryVelocity! < 0) {
+              // Deslizamiento hacia arriba
+              if (!_isExpanded) _toggleExpanded();
+            } else if (details.primaryVelocity! > 0) {
+              // Deslizamiento hacia abajo
+              if (_isExpanded) _toggleExpanded();
+            }
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Indicador de deslizamiento
+              Container(
+                color: const Color.fromRGBO(98, 17, 50, 1),
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Column(
+                  children: [
+                    Center(
+                      child: SvgPicture.asset(
+                        'assets/logo_blanco.svg',
+                        height: 40,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    const Icon(
+                      Icons.keyboard_arrow_up,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                    const Text(
+                      'Desliza para ver más',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Contenido expandible
+              SizeTransition(
+                sizeFactor: _animation,
+                child: Container(
+                  color: const Color.fromRGBO(98, 17, 50, 1),
+                  padding: const EdgeInsets.all(12.0),
+                  child: _buildMobileLayout(),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
@@ -47,14 +143,6 @@ class FooterSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Center(
-          child: SvgPicture.asset(
-            'assets/logo_blanco.svg',
-            fit: BoxFit.contain,
-            width: 150,
-          ),
-        ),
-        const SizedBox(height: 24),
         ExpansionTile(
           title: const Text(
             'Enlaces',
@@ -174,15 +262,15 @@ class FooterSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         InkWell(
-          onTap: () => _launchURL('mailto:dudasportal@profeco.gob.mx'),
+          onTap: () => _launchURL('mailto:kioskodigitalcna@gmail.com'),
           child: const Text(
-            'Dudas e información a dudasportal@profeco.gob.mx',
+            'Dudas e información a kioskodigitalcna@gmail.com',
             style: TextStyle(color: Colors.white),
           ),
         ),
         const SizedBox(height: 16),
         const Text(
-          'Síguenos en',
+          'Síguenos en\n',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
