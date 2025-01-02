@@ -92,6 +92,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double withg = MediaQuery.of(context).size.width;
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -107,44 +108,36 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
           ),
-          Row(
-            children: [
-              Container(
-                width: 250,
-                height: 60,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: const BoxDecoration(
-                  border: Border(
-                    right: BorderSide(color: Colors.black, width: 1),
-                  ),
-                ),
-                child: const ArrowContainer(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  width: double.infinity,
-                  color: Color.fromRGBO(98, 17, 50, 1),
-                  child: Row(
-                    children: [
-                      SizedBox(width: 5),
-                      Text(
-                        'Publicaciones Recientes',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+          SizedBox(
+            width: withg,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  SizedBox(
+                    height: 60,
+                    width: withg / 2.6,
+                    child: ArrowContainer(
+                      width: withg / 2.6,
+                      padding: const EdgeInsets.symmetric(horizontal: 1),
+                      color: const Color.fromRGBO(98, 17, 50, 1),
+                      child: const Center(
+                        child: Text(
+                          'Publicaciones Recientes',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                  const Expanded(child: NewsMarquee()),
+                ],
               ),
-              // S
-              Container(
-                width: 1200,
-                decoration:
-                    BoxDecoration(border: Border.all(color: Colors.black)),
-                child: const NewsMarquee(),
-              ),
-            ],
+            ),
           ),
           Expanded(
             child: currentContent, //,
@@ -378,7 +371,7 @@ class _NewsMarqueeState extends State<NewsMarquee> {
           );
         } else {
           _scrollController.animateTo(
-            currentPosition + 100, // Ajustado para scroll horizontal
+            currentPosition + 100,
             duration: const Duration(milliseconds: 200),
             curve: Curves.linearToEaseOut,
           );
@@ -396,50 +389,52 @@ class _NewsMarqueeState extends State<NewsMarquee> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 70, // Altura reducida para el marquee horizontal
-      color: Colors.white,
-      width: double.maxFinite,
-      child: Row(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              scrollDirection: Axis.horizontal,
-              itemCount: newsItems.length,
-              itemBuilder: (context, index) {
-                return Container(
-                  width: double.maxFinite, // Ancho fijo para cada noticia
-                  decoration: const BoxDecoration(
-                    border: Border(
-                      right: BorderSide(color: Colors.black, width: 1),
-                    ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double itemWidth =
+            constraints.maxWidth * 0.8; // 80% del ancho disponible
+
+        return Container(
+          height: 70,
+          color: Colors.white,
+          child: ListView.builder(
+            controller: _scrollController,
+            scrollDirection: Axis.horizontal,
+            itemCount: newsItems.length,
+            itemBuilder: (context, index) {
+              return Container(
+                width: itemWidth,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: const BoxDecoration(
+                  border: Border(
+                    right: BorderSide(color: Colors.black, width: 1),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  // Ancho fijo para cada noticia
-                  child: Row(
-                    children: [
-                      // Botón Nuevo
-                      ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
-                          minimumSize: const Size(0, 0),
-                          textStyle: const TextStyle(
-                              fontSize: 15, color: Colors.black),
+                ),
+                child: Row(
+                  children: [
+                    // Botón Nuevo
+                    ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
                         ),
-                        child: const Text(
-                          'Nuevo',
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
+                        minimumSize: const Size(0, 0),
+                      ),
+                      child: const Text(
+                        'Nuevo',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      // Contenido de la noticia
-                      Row(
+                    ),
+                    const SizedBox(width: 4),
+                    // Fecha e ícono
+                    Flexible(
+                      child: Row(
                         children: [
                           const Icon(
                             Icons.calendar_today,
@@ -451,33 +446,36 @@ class _NewsMarqueeState extends State<NewsMarquee> {
                             DateFormat('yyyy-MM-dd HH:mm:ss')
                                 .format(newsItems[index].date),
                             style: const TextStyle(
-                                fontSize: 15,
-                                color: Colors.black,
-                                fontStyle: FontStyle.normal,
-                                fontWeight: FontWeight.w400),
+                              fontSize: 15,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
                           const SizedBox(width: 6),
-                          Text(
-                            newsItems[index].title,
-                            style: const TextStyle(
+                          // Título con Expanded para ocupar el espacio restante
+                          Expanded(
+                            child: Text(
+                              newsItems[index].title,
+                              style: const TextStyle(
                                 color: Colors.black,
-                                letterSpacing: 4.5,
+                                letterSpacing: 1.0,
                                 decoration: TextDecoration.underline,
-                                fontStyle: FontStyle.normal,
-                                fontWeight: FontWeight.w400),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                                fontWeight: FontWeight.w400,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -513,10 +511,7 @@ class ArrowContainer extends StatelessWidget {
     return CustomPaint(
       size: Size(width, 50), // Altura fija; ajusta según lo necesario
       painter: ArrowPainter(color: color),
-      child: Padding(
-        padding: padding,
-        child: child,
-      ),
+      child: child,
     );
   }
 }

@@ -75,11 +75,16 @@ class FormularioConsultaState extends State<FormularioConsulta> {
   }
 
   Future<void> _seleccionarFecha() async {
+    // Obtener la fecha actual
+    final now = DateTime.now();
+    // Crear la fecha límite como el último día del año actual
+    final lastDate = DateTime(now.year, 12, 31);
+
     final DateTime? fecha = await showDatePicker(
       context: context,
-      initialDate: _model.fechaIngreso ?? DateTime.now(),
+      initialDate: _model.fechaIngreso ?? now,
       firstDate: DateTime(2000),
-      lastDate: DateTime(2025),
+      lastDate: lastDate, // Usar la fecha límite dinámica
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
