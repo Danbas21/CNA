@@ -35,12 +35,76 @@ class SearchBarFraudeState extends State<SearchBarFraude> {
     'CONSIGNACIÓN GUBERNAMENTAL'
   ];
 
+  int _calcularDistanciaLevenshtein(String s1, String s2) {
+    if (s1.isEmpty) return s2.length;
+    if (s2.isEmpty) return s1.length;
+
+    List<List<int>> matriz = List.generate(
+      s1.length + 1,
+      (i) => List.generate(s2.length + 1, (j) => 0),
+    );
+
+    for (int i = 0; i <= s1.length; i++) {
+      matriz[i][0] = i;
+    }
+    for (int j = 0; j <= s2.length; j++) {
+      matriz[0][j] = j;
+    }
+
+    for (int i = 1; i <= s1.length; i++) {
+      for (int j = 1; j <= s2.length; j++) {
+        int costo = (s1[i - 1] == s2[j - 1]) ? 0 : 1;
+        matriz[i][j] = [
+          matriz[i - 1][j] + 1,
+          matriz[i][j - 1] + 1,
+          matriz[i - 1][j - 1] + costo,
+        ].reduce((curr, next) => curr < next ? curr : next);
+      }
+    }
+
+    return matriz[s1.length][s2.length];
+  }
+
+// Función auxiliar para calcular el porcentaje de similitud
+  double _calcularSimilitud(String s1, String s2) {
+    int maxLength = s1.length > s2.length ? s1.length : s2.length;
+    int distancia = _calcularDistanciaLevenshtein(s1, s2);
+    return ((maxLength - distancia) / maxLength) * 100;
+  }
+
+// Función auxiliar para verificar si una cadena contiene todas las palabras de búsqueda
+  bool _contieneTodasLasPalabras(String texto, String busqueda) {
+    List<String> palabrasBusqueda = busqueda.split(' ');
+    return palabrasBusqueda.every((palabra) => texto.split(' ').any(
+        (palabraTexto) => _calcularSimilitud(palabra, palabraTexto) >= 80));
+  }
+
   void _realizarBusqueda() {
     String busqueda = _searchController.text.toUpperCase();
 
     if (busqueda.isEmpty) return;
 
-    bool encontrado = listaFraudes.contains(busqueda);
+    // Buscar la mejor coincidencia
+    double mejorSimilitud = 0;
+    String? mejorCoincidencia;
+    bool coincidenciaParcial = false;
+
+    for (String fraude in listaFraudes) {
+      // Verificar coincidencia exacta con umbral de similitud
+      double similitud = _calcularSimilitud(busqueda, fraude);
+
+      // Verificar si contiene todas las palabras de la búsqueda
+      bool contienePalabras = _contieneTodasLasPalabras(fraude, busqueda);
+
+      if (similitud > mejorSimilitud || contienePalabras) {
+        mejorSimilitud = similitud;
+        mejorCoincidencia = fraude;
+        coincidenciaParcial = contienePalabras;
+      }
+    }
+
+    // Considerar como coincidencia si la similitud es mayor al 80% o si contiene todas las palabras
+    bool encontrado = mejorSimilitud >= 80 || coincidenciaParcial;
 
     showDialog(
       context: context,
@@ -48,7 +112,7 @@ class SearchBarFraudeState extends State<SearchBarFraude> {
         return AlertDialog(
           title: Text(encontrado ? '¡Advertencia!' : 'Información'),
           content: Text(encontrado
-              ? 'La empresa "$busqueda" está siendo investigada por fraude.'
+              ? 'La empresa "$mejorCoincidencia" está siendo investigada por fraude.${coincidenciaParcial ? '\n(Coincidencia parcial encontrada)' : '\n(Similitud: ${mejorSimilitud.toStringAsFixed(1)}%)'}'
               : 'No se encontraron coincidencias para la búsqueda.'),
           actions: [
             TextButton(
