@@ -8,30 +8,52 @@ class FormularioConsulta extends StatefulWidget {
   FormularioConsultaState createState() => FormularioConsultaState();
 }
 
+class ConsultaFormModel {
+  String nombre = '';
+  String folio = '';
+  DateTime? fechaIngreso;
+
+  bool isValid() {
+    return nombre.isNotEmpty &&
+        folio.isNotEmpty &&
+        fechaIngreso != null &&
+        _isFolioValid();
+  }
+
+  bool _isFolioValid() {
+    // Ejemplo: validar que el folio tenga el formato correcto
+    final folioRegex = RegExp(r'^[A-Z0-9]{6,}$');
+    return folioRegex.hasMatch(folio);
+  }
+}
+
 class FormularioConsultaState extends State<FormularioConsulta> {
   final _formKey = GlobalKey<FormState>();
+  final _model = ConsultaFormModel();
   final _nombreController = TextEditingController();
   final _folioController = TextEditingController();
-  DateTime? _fechaIngreso;
+  bool _isLoading = false;
 
   Future<void> _consultarFolio() async {
-    // Simular proceso de 15 segundos
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      },
-    );
+    if (!_model.isValid()) return;
 
-    await Future.delayed(const Duration(seconds: 15));
-    if (!mounted) return; // Verificar si el widget aún está montado
-    Navigator.pop(context);
-    // Cerrar el indicador de carga
+    setState(() => _isLoading = true);
 
-    // Mostrar mensaje de confirmación
+    try {
+      // Simular proceso de 15 segundos con un indicador no bloqueante
+      await Future.delayed(const Duration(seconds: 15));
+
+      if (!mounted) return;
+
+      _mostrarConfirmacion();
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  void _mostrarConfirmacion() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -44,9 +66,7 @@ class FormularioConsultaState extends State<FormularioConsulta> {
           actions: [
             TextButton(
               child: const Text('Aceptar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
             ),
           ],
         );
@@ -57,119 +77,147 @@ class FormularioConsultaState extends State<FormularioConsulta> {
   Future<void> _seleccionarFecha() async {
     final DateTime? fecha = await showDatePicker(
       context: context,
-      initialDate: _fechaIngreso ?? DateTime.now(),
+      initialDate: _model.fechaIngreso ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2025),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color.fromRGBO(98, 17, 50, 1),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (fecha != null) {
       setState(() {
-        _fechaIngreso = fecha;
+        _model.fechaIngreso = fecha;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Consulta tu folio',
-            style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.w700,
-              fontSize: 50,
-            )),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextFormField(
-                controller: _nombreController,
-                decoration: const InputDecoration(
-                  labelText: 'Nombre',
-                  labelStyle: TextStyle(
-                    color: Colors.black,
-                    fontSize: 25,
-                  ),
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese un nombre';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _folioController,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 25,
-                ),
-                decoration: const InputDecoration(
-                    labelText: 'Folio',
-                    labelStyle: TextStyle(
-                      color: Colors.black,
-                      fontSize: 25,
-                    ),
-                    border: OutlineInputBorder()),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese un folio';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              InkWell(
-                onTap: _seleccionarFecha,
-                child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Fecha de Ingreso',
-                    border: OutlineInputBorder(),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    final theme = Theme.of(context);
+
+    return Stack(
+      children: [
+        LayoutBuilder(
+          builder: (context, constraints) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                          _fechaIngreso == null
-                              ? 'Seleccionar fecha'
-                              : '${_fechaIngreso!.day}/${_fechaIngreso!.month}/${_fechaIngreso!.year}',
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 25,
-                          )),
-                      const Icon(Icons.calendar_today),
+                      _buildTextField(
+                        controller: _nombreController,
+                        label: 'Nombre',
+                        validator: (value) {
+                          if (value?.isEmpty ?? true) {
+                            return 'Por favor ingrese un nombre';
+                          }
+                          return null;
+                        },
+                        onChanged: (value) => _model.nombre = value,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                        controller: _folioController,
+                        label: 'Folio',
+                        validator: (value) {
+                          if (value?.isEmpty ?? true) {
+                            return 'Por favor ingrese un folio';
+                          }
+                          if (!RegExp(r'^[A-Z0-9]{6,}$').hasMatch(value!)) {
+                            return 'El folio debe tener al menos 6 caracteres alfanuméricos';
+                          }
+                          return null;
+                        },
+                        onChanged: (value) => _model.folio = value,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildFechaSelector(theme),
+                      const SizedBox(height: 24),
+                      Center(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                const Color.fromRGBO(98, 17, 50, 1),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 50,
+                              vertical: 15,
+                            ),
+                          ),
+                          onPressed: _isLoading ? null : _consultarFolio,
+                          child: Text(
+                            'Consultar Folio',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
-              Center(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromRGBO(98, 17, 50, 1),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 50, vertical: 15),
-                  ),
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      _consultarFolio();
-                    }
-                  },
-                  child: const Text(
-                    'Consultar Folio',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                ),
-              ),
-            ],
+            );
+          },
+        ),
+        if (_isLoading)
+          Container(
+            color: Colors.black54,
+            child: const Center(
+              child: CircularProgressIndicator(),
+            ),
           ),
+      ],
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String? Function(String?) validator,
+    required void Function(String) onChanged,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+      style: Theme.of(context).textTheme.titleLarge,
+      validator: validator,
+      onChanged: onChanged,
+    );
+  }
+
+  Widget _buildFechaSelector(ThemeData theme) {
+    return InkWell(
+      onTap: _seleccionarFecha,
+      child: InputDecorator(
+        decoration: const InputDecoration(
+          labelText: 'Fecha de Ingreso',
+          border: OutlineInputBorder(),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              _model.fechaIngreso == null
+                  ? 'Seleccionar fecha'
+                  : '${_model.fechaIngreso!.day}/${_model.fechaIngreso!.month}/${_model.fechaIngreso!.year}',
+              style: theme.textTheme.titleLarge,
+            ),
+            const Icon(Icons.calendar_today),
+          ],
         ),
       ),
     );
